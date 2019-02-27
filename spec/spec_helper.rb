@@ -1,6 +1,9 @@
 require 'simplecov'
 require "bundler/setup"
+require 'redis'
 require "redis/claim"
+
+Dir[File.expand_path('../support/**/*.rb', __FILE__)].each { |f| require f }
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure
