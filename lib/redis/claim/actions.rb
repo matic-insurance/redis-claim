@@ -11,6 +11,13 @@ class Redis
         @config = config
       end
 
+      def self.claim_db!(config)
+        actions = self.new(config)
+        actions.verify_connection!
+        actions.verify_connection!
+        actions.claim_db!
+      end
+
       def verify_config!
         raise Redis::Claim::InvalidConfiguration, 'app name is missing' unless app_name
         raise Redis::Claim::InvalidConfiguration, 'redis is missing' unless redis
