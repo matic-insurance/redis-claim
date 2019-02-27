@@ -1,3 +1,4 @@
+require 'simplecov'
 require "bundler/setup"
 require "redis/claim"
 

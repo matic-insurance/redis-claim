@@ -3,7 +3,7 @@ RSpec.describe Redis::Claim do
     expect(Redis::Claim::VERSION).not_to be nil
   end
 
-  it "does something useful" do
-    expect(false).to eq(true)
+  it 'works out of the box' do
+    expect { Redis::Claim.verify }.to_not raise_error
   end
 end
