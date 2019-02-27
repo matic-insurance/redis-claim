@@ -1,7 +1,7 @@
 require "redis/claim/version"
 
-module Redis
-  module Claim
+class Redis
+  class Claim
     class Error < StandardError; end
     # Your code goes here...
     def self.verify
