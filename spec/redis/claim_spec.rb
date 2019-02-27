@@ -4,6 +4,20 @@ RSpec.describe Redis::Claim do
   end
 
   it 'works out of the box' do
-    expect { Redis::Claim.verify }.to_not raise_error
+    expect { claim_db }.to_not raise_error
+  end
+
+  it 'fails when db claimed' do
+    REDIS.set('redis-claim::app', 'app')
+    expect(&method(:claim_db)).to raise_error
+  end
+end
+
+private
+
+def claim_db
+  Redis::Claim.verify do |config|
+    config.redis = REDIS
+    config.app_name = APP_NAME
   end
 end
