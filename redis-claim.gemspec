@@ -22,7 +22,7 @@ Gem::Specification.new do |spec|
 
     spec.metadata["homepage_uri"] = spec.homepage
     spec.metadata["source_code_uri"] = "https://github.com/matic-insurance/redis-claim"
-    spec.metadata["changelog_uri"] = "https://github.com/matic-insurance/redis-claim/CHANGELOG.md"
+    spec.metadata["changelog_uri"] = "https://github.com/matic-insurance/redis-claim/blob/master/CHANGELOG.md"
   else
     raise "RubyGems 2.0 or newer is required to protect against " \
       "public gem pushes."
