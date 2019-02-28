@@ -7,6 +7,9 @@
 Prevent conflicts of several apps using same Redis database or namespace. 
 Allows to check if db is already taken and claim ownership of the db.
 
+Common use case for the gem is microservices that share single physical redis instance. 
+In such case it is common problem to make an error in redis url, or namespace.   
+
 ## Installation
 
 Add this line to your application's Gemfile:
@@ -15,23 +18,42 @@ Add this line to your application's Gemfile:
 gem 'redis-claim'
 ```
 
-And then execute:
-
-    $ bundle
-
-Or install it yourself as:
-
-    $ gem install redis-claim
-
 ## Usage
 
-TODO: Write usage instructions here
+On the start of your application execute following code. 
+Exception will be raised in case of configuration or claim error 
+
+```ruby
+Redis::Claim.verify do |config|
+  # Your redis instance you want to claim
+  config.redis = REDIS      
+  # Application name to detect any other service that claimed db  
+  config.app_name = 'my cool application'
+end
+```
+
+For rails you can add this code to custom initializer `redis_claim.rb` in `app/config/initializers`
+
+## Behaviour
+
+Redis Claim has following execution steps
+
+1. Executed only once on start of the application. 
+1. Checks connection to redis by calling `ping` command
+1. Sets lock key if it does not exist with `setnx` command
+1. Reads lock key if it exists and compares to `app_name`
+1. Checks if existing lock key is the same as `app_name`
+
+**IMPORTANT** Redis claim will not detect db conflict if another application/service is not using it 
 
 ## Development
 
-After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
-
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and tags, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+1. [Install Redis](https://redis.io//download)
+1. Run `bin/setup` to install dependencies
+1. Run tests `rspec`
+1. Add new test
+1. Add new code
+1. Go to step 3
 
 ## Contributing
 
