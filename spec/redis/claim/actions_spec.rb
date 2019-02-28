@@ -11,13 +11,13 @@ RSpec.describe Redis::Claim::Actions do
       expect { actions.verify_config! }.to raise_error(Redis::Claim::InvalidConfiguration)
     end
 
-    it 'raises error when redis doesnt have ping method' do
-      config.redis = double('fake redis', setnx: 1)
+    it 'raises error when redis doesnt have get method' do
+      config.redis = double('fake redis', setnx: true)
       expect { actions.verify_config! }.to raise_error(Redis::Claim::InvalidConfiguration)
     end
 
     it 'raises error when redis doesnt have setnx method' do
-      config.redis = double('fake redis', ping: 'pong')
+      config.redis = double('fake redis', get: 'test')
       expect { actions.verify_config! }.to raise_error(Redis::Claim::InvalidConfiguration)
     end
 
@@ -31,28 +31,13 @@ RSpec.describe Redis::Claim::Actions do
     end
   end
 
-  describe 'verify_connection!' do
-    context 'without connection' do
-      before { allow(config.redis).to receive(:ping).and_raise('no connection') }
-
-      it 'passes when ignoring connection errors' do
-        config.ignore_connection_error = true
-        expect { actions.verify_connection! }.not_to raise_error
-      end
-
-      it 'fails' do
-        expect { actions.verify_connection! }.to raise_error('no connection')
-      end
-    end
-  end
-
   describe 'claim_db!' do
     context 'without connection' do
       before { allow(config.redis).to receive(:setnx).and_raise('no connection') }
 
-      it 'fails when ignoring connection errors' do
+      it 'passes when ignoring connection errors' do
         config.ignore_connection_error = true
-        expect { actions.claim_db! }.to raise_error('no connection')
+        expect { actions.claim_db! }.not_to raise_error
       end
 
       it 'fails' do

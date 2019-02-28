@@ -14,7 +14,6 @@ class Redis
       def self.claim_db!(config)
         actions = self.new(config)
         actions.verify_config!
-        actions.verify_connection!
         actions.claim_db!
       end
 
@@ -25,17 +24,13 @@ class Redis
         true
       end
 
-      def verify_connection!
-        return true if config.ignore_connection_error
-
-        redis.ping
-      end
-
       def claim_db!
-        return true if redis.setnx(lock_key, app_name)
-        return true if redis.get(lock_key) == app_name
-
-        raise Redis::Claim::DbAlreadyClaimed, "database already claimed by #{redis.get(lock_key)}"
+        current_lock = get_db_lock
+        if app_name == current_lock
+          true
+        else
+          raise Redis::Claim::DbAlreadyClaimed, "database already claimed by #{current_lock}"
+        end
       end
 
       protected
@@ -48,10 +43,18 @@ class Redis
       end
 
       def check_redis_functionality!
-        return raise_configuration_error('redis should respond to ping') unless redis.respond_to?(:ping)
+        return raise_configuration_error('redis should respond to get') unless redis.respond_to?(:get)
         return raise_configuration_error('redis should respond to setnx') unless redis.respond_to?(:setnx)
 
         true
+      end
+
+      def get_db_lock
+        return app_name if redis.setnx(lock_key, app_name)
+        redis.get(lock_key)
+      rescue => e
+        return app_name if config.ignore_connection_error
+        raise e
       end
 
       def raise_configuration_error(message)
