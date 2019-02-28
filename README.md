@@ -46,10 +46,9 @@ An `Redis::Claim::Error` will be raised in case of configuration or claim error
 Redis Claim has following execution steps
 
 1. Executed only once on start of the application. 
-1. Checks connection to redis by calling `ping` command
 1. Sets lock key if it does not exist with `setnx` command
-1. Reads lock key if it exists and compares to `app_name`
-1. Checks if existing lock key is the same as `app_name`
+1. Reads lock key if it exists
+1. Compare existing lock key is the same as `app_name`
 
 **IMPORTANT** Redis claim will not detect db conflict if another application/service is not using it
 
@@ -59,7 +58,7 @@ When executing `Redis::Claim.verify` - passed block will receive configuraiton o
 
 | Parameter               | Format  | Required | Description                                                                                         |
 |-------------------------|---------|----------|-----------------------------------------------------------------------------------------------------|
-| redis                   | Object  | true     | Initialized Redis. Work with any object as long as it responds to `ping`, `get` and `setnx` methods |
+| redis                   | Object  | true     | Initialized Redis. Work with any object as long as it responds to `get` and `setnx` methods         |
 | app_name                | String  | true     | Name of your application. Should be uniuq for every microservice.                                   |
 | ignore_connection_error | Boolean | false    | Do not raise exception when cannot connect to Redis. Default: **false**                             |
 | lock_key                | String  | false    | Name of the redis key where lock identifier will be recorded. Default: **'redis-claim:app'**        |

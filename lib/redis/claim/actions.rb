@@ -14,7 +14,6 @@ class Redis
       def self.claim_db!(config)
         actions = self.new(config)
         actions.verify_config!
-        actions.verify_connection!
         actions.claim_db!
       end
 
@@ -23,12 +22,6 @@ class Redis
         check_redis_functionality!
 
         true
-      end
-
-      def verify_connection!
-        return true if config.ignore_connection_error
-
-        redis.ping
       end
 
       def claim_db!
@@ -50,7 +43,7 @@ class Redis
       end
 
       def check_redis_functionality!
-        return raise_configuration_error('redis should respond to ping') unless redis.respond_to?(:ping)
+        return raise_configuration_error('redis should respond to get') unless redis.respond_to?(:get)
         return raise_configuration_error('redis should respond to setnx') unless redis.respond_to?(:setnx)
 
         true
