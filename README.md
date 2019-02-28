@@ -8,7 +8,8 @@ Prevent conflicts of several apps using same Redis database or namespace.
 Allows to check if db is already taken and claim ownership of the db.
 
 Common use case for the gem is microservices that share single physical redis instance. 
-In such case it is common problem to make an error in redis url, or namespace.   
+In such case it is common problem to make an error in redis url, or namespace. 
+When passing redis url to the app it is very to make mistake in redis database number.   
 
 ## Installation
 
@@ -20,8 +21,12 @@ gem 'redis-claim'
 
 ## Usage
 
+Assuming you have redis you want to claim
+```ruby
+REDIS = Redis.new(url: "redis://redis-instance.aws.com:6379/12")
+```
+
 On the start of your application execute following code. 
-Exception will be raised in case of configuration or claim error 
 
 ```ruby
 Redis::Claim.verify do |config|
@@ -32,7 +37,9 @@ Redis::Claim.verify do |config|
 end
 ```
 
-For rails you can add this code to custom initializer `redis_claim.rb` in `app/config/initializers`
+An `Redis::Claim::Error` will be raised in case of configuration or claim error 
+
+**NOTE** For rails you can add this code to custom initializer `redis_claim.rb` in `app/config/initializers`
 
 ## Behaviour
 
@@ -44,7 +51,18 @@ Redis Claim has following execution steps
 1. Reads lock key if it exists and compares to `app_name`
 1. Checks if existing lock key is the same as `app_name`
 
-**IMPORTANT** Redis claim will not detect db conflict if another application/service is not using it 
+**IMPORTANT** Redis claim will not detect db conflict if another application/service is not using it
+
+## Configuration options
+
+When executing `Redis::Claim.verify` - passed block will receive configuraiton object with following properties: 
+
+| Parameter               | Format  | Required | Description                                                                                         |
+|-------------------------|---------|----------|-----------------------------------------------------------------------------------------------------|
+| redis                   | Object  | true     | Initialized Redis. Work with any object as long as it responds to `ping`, `get` and `setnx` methods |
+| app_name                | String  | true     | Name of your application. Should be uniuq for every microservice.                                   |
+| ignore_connection_error | Boolean | false    | Do not raise exception when cannot connect to Redis. Default: **false**                             |
+| lock_key                | String  | false    | Name of the redis key where lock identifier will be recorded. Default: **'redis-claim:app'**        |
 
 ## Development
 
