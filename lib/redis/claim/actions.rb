@@ -13,16 +13,14 @@ class Redis
 
       def self.claim_db!(config)
         actions = self.new(config)
-        actions.verify_connection!
+        actions.verify_config!
         actions.verify_connection!
         actions.claim_db!
       end
 
       def verify_config!
-        raise Redis::Claim::InvalidConfiguration, 'app name is missing' unless app_name
-        raise Redis::Claim::InvalidConfiguration, 'redis is missing' unless redis
-        raise Redis::Claim::InvalidConfiguration, 'redis should respond to ping' unless redis.respond_to?(:ping)
-        raise Redis::Claim::InvalidConfiguration, 'redis should respond to setnx' unless redis.respond_to?(:setnx)
+        check_config_values!
+        check_redis_functionality!
 
         true
       end
@@ -38,6 +36,26 @@ class Redis
         return true if redis.get(lock_key) == app_name
 
         raise Redis::Claim::DbAlreadyClaimed, "database already claimed by #{redis.get(lock_key)}"
+      end
+
+      protected
+
+      def check_config_values!
+        return raise_configuration_error('app name is missing') unless app_name
+        return raise_configuration_error('redis is missing') unless redis
+
+        true
+      end
+
+      def check_redis_functionality!
+        return raise_configuration_error('redis should respond to ping') unless redis.respond_to?(:ping)
+        return raise_configuration_error('redis should respond to setnx') unless redis.respond_to?(:setnx)
+
+        true
+      end
+
+      def raise_configuration_error(message)
+        raise Redis::Claim::InvalidConfiguration, message
       end
     end
   end
