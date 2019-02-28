@@ -50,9 +50,9 @@ RSpec.describe Redis::Claim::Actions do
     context 'without connection' do
       before { allow(config.redis).to receive(:setnx).and_raise('no connection') }
 
-      it 'fails when ignoring connection errors' do
+      it 'passes when ignoring connection errors' do
         config.ignore_connection_error = true
-        expect { actions.claim_db! }.to raise_error('no connection')
+        expect { actions.claim_db! }.not_to raise_error
       end
 
       it 'fails' do
